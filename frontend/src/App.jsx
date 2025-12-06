@@ -1,17 +1,20 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import MainMenu from './MainMenu'
+import Login from './Login'
+import Navbar from './Navbar'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [page, setPage] = useState('main')
+
+  const navigate = (to) => setPage(to)
 
   return (
     <>
-      <MainMenu/>
+      <Navbar onNavigate={navigate} />
+      {page === 'login' ? <Login onBack={() => navigate('main')} /> : <MainMenu onNavigate={navigate} />}
     </>
-  );
+  )
 }
 
 export default App
