@@ -1,4 +1,3 @@
-import React from 'react'
 import './MainMenu.css'
 import { useAuth } from './context/AuthContext'
 
@@ -20,11 +19,11 @@ function Navbar({ onNavigate = () => {} }) {
         <div className="d-flex align-items-center ms-auto nav-buttons">
           {isAuthenticated ? (
             <>
-              <span className="text-light me-3">Welcome, {user?.username}!</span>
-              <button type="button" className="btn btn-outline-light me-2" onClick={() => onNavigate('profile')}>
+              <span className="text-light">Welcome, {user?.username}!</span>
+              <button type="button" className="btn btn-outline-light" onClick={() => onNavigate('profile')}>
                 Profile
               </button>
-              <button type="button" className="btn btn-outline-light me-2" onClick={() => onNavigate('leaderboard')}>
+              <button type="button" className="btn btn-outline-light" onClick={() => onNavigate('leaderboard')}>
                 Leaderboard
               </button>
               <button type="button" className="btn btn-light" onClick={handleLogout}>

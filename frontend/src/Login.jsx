@@ -3,15 +3,17 @@ import './Login.css'
 import { useAuth } from './context/AuthContext'
 import axiosInstance from './utils/axiosConfig'
 
-function Login({ onBack }) {
+function Login({ onBack, onRegister }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
 
     try {
@@ -19,7 +21,7 @@ function Login({ onBack }) {
         email,
         password
       })
-      
+
       const { token } = response.data
       const tokenPayload = JSON.parse(atob(token.split('.')[1]))
       const userData = {
@@ -30,6 +32,13 @@ function Login({ onBack }) {
       onBack()
     } catch (err) {
       console.error('Login error:', err)
+      if (err.response) {
+        setError(err.response.data.message || err.response.data || 'Login failed. Please check your credentials.')
+      } else if (err.request) {
+        setError('Unable to connect to server. Please try again later.')
+      } else {
+        setError('An unexpected error occurred. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -51,6 +60,12 @@ function Login({ onBack }) {
               <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
 
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="form-check">
                 <input 
@@ -68,6 +83,13 @@ function Login({ onBack }) {
             <div className="d-grid">
               <button className="btn btn-primary" type="submit" disabled={loading}>
                 {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </div>
+
+            <div className="text-center mt-3">
+              <div className="form-register-label">Don't have an account?</div>
+              <button type="button" className="btn btn-link p-0" onClick={onRegister}>
+                Sign up
               </button>
             </div>
           </form>

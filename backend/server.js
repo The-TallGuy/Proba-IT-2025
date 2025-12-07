@@ -79,6 +79,42 @@ app.post('/api/grills/upload', authenticateToken, upload.single('grill'), async 
   }
 })
 
+app.get('/api/grills/my-grills', authenticateToken, async (req, res) => {
+  try {
+    const grills = await Grill.find({ creatorId: req.user.id }).sort({ _id: -1 });
+    res.status(200).json(grills);
+  } catch (err) {
+    res.status(500).send("Error fetching grills: " + err.message);
+  }
+})
+
+app.get('/api/grills/leaderboard', async (req, res) => {
+  try {
+    const grills = await Grill.find().populate('creatorId', 'username').sort({ mici: -1 });
+    res.status(200).json(grills);
+  } catch (err) {
+    res.status(500).send("Error fetching leaderboard: " + err.message);
+  }
+})
+
+app.delete('/api/grills/:id', authenticateToken, async (req, res) => {
+  try {
+    const grill = await Grill.findById(req.params.id);
+    
+    if (!grill) {
+      return res.status(404).send("Grill not found!");
+    }
+    if (grill.creatorId.toString() !== req.user.id) {
+      return res.status(403).send("You don't have permission to delete this grill!");
+    }
+    
+    await Grill.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Grill deleted successfully!" });
+  } catch (err) {
+    res.status(500).send("Error deleting grill: " + err.message);
+  }
+})
+
 //
 
 app.post('/api/users/signup', async (req, res) => {
