@@ -40,6 +40,22 @@ function MyGrills({ onBack, onUpload }) {
     }
   }
 
+  const handleLike = async (grillId) => {
+    try {
+      const response = await axiosInstance.post(`/grills/${grillId}/like`)
+      setGrills(prevGrills => 
+        prevGrills.map(grill => 
+          grill._id === grillId 
+            ? { ...grill, mici: response.data.mici, isLiked: response.data.isLiked }
+            : grill
+        )
+      )
+    } catch (err) {
+      console.error('Error liking grill:', err)
+      alert('Failed to like grill. Please try again.')
+    }
+  }
+
   return (
     <div className="mainmenu-root">
       <div className="container py-4">
@@ -84,19 +100,35 @@ function MyGrills({ onBack, onUpload }) {
                     <h5 className="card-title">{grill.name}</h5>
                     <p className="card-text">
                       <span className="badge bg-secondary me-2">{grill.menu}</span>
-                      <span className="text-muted">🔥 {grill.mici} mici</span>
+                      <span className="text-muted">
+                        <img src="/Mici_Rumeniti.png" alt="mici" style={{width: '18px', height: '18px', marginRight: '4px'}} />
+                        {grill.mici} mici
+                      </span>
                     </p>
                     {grill.description && (
                       <p className="card-text small text-muted">{grill.description}</p>
                     )}
                   </div>
                   <div className="card-footer bg-transparent border-top-0">
-                    <button 
-                      className="btn btn-danger btn-sm w-100" 
-                      onClick={() => handleDelete(grill._id, grill.name)}
-                    >
-                      Delete
-                    </button>
+                    <div className="d-grid gap-2">
+                      <button 
+                        className={`btn btn-sm ${grill.isLiked ? 'btn-danger' : 'btn-outline-danger'}`}
+                        onClick={() => handleLike(grill._id)}
+                      >
+                        <img 
+                          src={grill.isLiked ? '/Mici_Rumeniti.png' : '/Mici_Cruzi.png'} 
+                          alt="mic" 
+                          style={{width: '18px', height: '18px', marginRight: '4px'}} 
+                        />
+                        {grill.isLiked ? 'Take Back Mic' : 'Give a Mic!'}
+                      </button>
+                      <button 
+                        className="btn btn-danger btn-sm" 
+                        onClick={() => handleDelete(grill._id, grill.name)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

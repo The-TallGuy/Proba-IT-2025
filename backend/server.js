@@ -82,7 +82,11 @@ app.post('/api/grills/upload', authenticateToken, upload.single('grill'), async 
 app.get('/api/grills/my-grills', authenticateToken, async (req, res) => {
   try {
     const grills = await Grill.find({ creatorId: req.user.id }).sort({ _id: -1 });
-    res.status(200).json(grills);
+    const grillsWithLikeStatus = grills.map(grill => ({
+      ...grill.toObject(),
+      isLiked: grill.likedBy.some(id => id.toString() === req.user.id)
+    }));
+    res.status(200).json(grillsWithLikeStatus);
   } catch (err) {
     res.status(500).send("Error fetching grills: " + err.message);
   }
@@ -91,9 +95,61 @@ app.get('/api/grills/my-grills', authenticateToken, async (req, res) => {
 app.get('/api/grills/leaderboard', async (req, res) => {
   try {
     const grills = await Grill.find().populate('creatorId', 'username').sort({ mici: -1 });
-    res.status(200).json(grills);
+    
+    const token = req.headers.authorization?.split(' ')[1];
+    let userId = null;
+    
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        //
+      }
+    }
+    
+    const grillsWithLikeStatus = grills.map(grill => {
+      const liked = userId ? grill.likedBy.some(id => id.toString() === userId) : false;
+      return {
+        ...grill.toObject(),
+        isLiked: liked
+      };
+    });
+    
+    res.status(200).json(grillsWithLikeStatus);
   } catch (err) {
     res.status(500).send("Error fetching leaderboard: " + err.message);
+  }
+})
+
+app.post('/api/grills/:id/like', authenticateToken, async (req, res) => {
+  try {
+    const grill = await Grill.findById(req.params.id);
+    
+    if (!grill) {
+      return res.status(404).send("Grill not found!");
+    }
+    
+    const userId = req.user.id;
+    const hasLiked = grill.likedBy.includes(userId);
+    
+    if (hasLiked) {
+      grill.likedBy = grill.likedBy.filter(id => id.toString() !== userId);
+      grill.mici = Math.max(0, grill.mici - 1);
+    } else {
+      grill.likedBy.push(userId);
+      grill.mici += 1;
+    }
+    
+    await grill.save();
+    
+    res.status(200).json({ 
+      message: hasLiked ? "Grill unliked!" : "Grill liked!", 
+      mici: grill.mici,
+      isLiked: !hasLiked
+    });
+  } catch (err) {
+    res.status(500).send("Error liking grill: " + err.message);
   }
 })
 

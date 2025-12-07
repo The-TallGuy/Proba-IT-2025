@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import './MainMenu.css'
 import axiosInstance from './utils/axiosConfig'
+import { useAuth } from './context/AuthContext'
 
 function Leaderboard({ onBack }) {
   const [grills, setGrills] = useState([])
   const [sortBy, setSortBy] = useState('mici')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     fetchLeaderboard()
@@ -55,6 +57,28 @@ function Leaderboard({ onBack }) {
       case 1: return '🥈'
       case 2: return '🥉'
       default: return ''
+    }
+  }
+
+  const handleLike = async (grillId) => {
+    if (!isAuthenticated) {
+      alert('Please log in to like grills!')
+      return
+    }
+
+    try {
+      const response = await axiosInstance.post(`/grills/${grillId}/like`)
+      
+      setGrills(prevGrills => 
+        prevGrills.map(grill => 
+          grill._id === grillId 
+            ? { ...grill, mici: response.data.mici, isLiked: response.data.isLiked }
+            : grill
+        )
+      )
+    } catch (err) {
+      console.error('Error liking grill:', err)
+      alert('Failed to like grill. Please try again.')
     }
   }
 
@@ -131,7 +155,10 @@ function Leaderboard({ onBack }) {
                           <h5 className="card-title">{grill.name}</h5>
                           <p className="card-text">
                             <span className="badge bg-secondary me-2">{grill.menu}</span>
-                            <span className="fw-bold">🔥 {grill.mici} mici</span>
+                            <span className="fw-bold">
+                              <img src="/Mici_Rumeniti.png" alt="mici" style={{width: '20px', height: '20px', marginRight: '4px'}} />
+                              {grill.mici} mici
+                            </span>
                           </p>
                           <p className="card-text small text-muted">
                             by {grill.creatorId?.username || 'Unknown'}
@@ -139,6 +166,20 @@ function Leaderboard({ onBack }) {
                           {grill.description && (
                             <p className="card-text small">{grill.description}</p>
                           )}
+                        </div>
+                        <div className="card-footer bg-transparent border-top-0">
+                          <button 
+                            className={`btn btn-sm w-100 ${grill.isLiked ? 'btn-danger' : 'btn-outline-danger'}`}
+                            onClick={() => handleLike(grill._id)}
+                            disabled={!isAuthenticated}
+                          >
+                            <img 
+                              src={grill.isLiked ? '/Mici_Rumeniti.png' : '/Mici_Cruzi.png'} 
+                              alt="mic" 
+                              style={{width: '20px', height: '20px', marginRight: '4px'}} 
+                            />
+                            {grill.isLiked ? 'Take Back Mic' : 'Give a Mic!'}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -167,7 +208,10 @@ function Leaderboard({ onBack }) {
                           </div>
                           <p className="card-text">
                             <span className="badge bg-secondary me-2">{grill.menu}</span>
-                            <span className="text-muted">🔥 {grill.mici} mici</span>
+                            <span className="text-muted">
+                              <img src="/Mici_Rumeniti.png" alt="mici" style={{width: '18px', height: '18px', marginRight: '4px'}} />
+                              {grill.mici} mici
+                            </span>
                           </p>
                           <p className="card-text small text-muted">
                             by {grill.creatorId?.username || 'Unknown'}
@@ -175,6 +219,20 @@ function Leaderboard({ onBack }) {
                           {grill.description && (
                             <p className="card-text small text-muted">{grill.description}</p>
                           )}
+                        </div>
+                        <div className="card-footer bg-transparent border-top-0">
+                          <button 
+                            className={`btn btn-sm w-100 ${grill.isLiked ? 'btn-danger' : 'btn-outline-danger'}`}
+                            onClick={() => handleLike(grill._id)}
+                            disabled={!isAuthenticated}
+                          >
+                            <img 
+                              src={grill.isLiked ? '/Mici_Rumeniti.png' : '/Mici_Cruzi.png'} 
+                              alt="mic" 
+                              style={{width: '18px', height: '18px', marginRight: '4px'}} 
+                            />
+                            {grill.isLiked ? 'Take Back Mic' : 'Give a Mic!'}
+                          </button>
                         </div>
                       </div>
                     </div>
