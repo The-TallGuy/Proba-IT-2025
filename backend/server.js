@@ -1,5 +1,6 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
+const cors = require('cors')
 const mongoose = require('mongoose')
 const User = require('./models/user.model.js')
 const Grill = require('./models/grill.model.js')
@@ -19,6 +20,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 const app = express()
+
+// Configure CORS to allow frontend origin
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite dev server default port
+  credentials: true
+}))
+
 app.use(express.json())
 app.use('/imgs', express.static(path.join(__dirname, '../imgs')));
 const port = 3000

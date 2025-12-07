@@ -1,3 +1,4 @@
 *.rest
 *.pdf
 *.jpg
+.vscode/
