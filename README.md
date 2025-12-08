@@ -34,5 +34,11 @@ MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=5000
 ```
 ### 4. Run the server
 ```bash
+cd backend
 node server.js
+```
+### 5. Turn on the frontend (new terminal)
+```bash
+cd frontend
+npm run dev
 ```
