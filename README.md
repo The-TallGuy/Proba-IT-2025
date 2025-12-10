@@ -42,7 +42,12 @@ ACCESS_TOKEN_SECRET =
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-### 4. Run the server
+### 4. Create your images folder inside the root folder:
+```bash
+mkdir imgs
+```
+
+### 5. Run the server
 ```bash
 node server.js
 ```
