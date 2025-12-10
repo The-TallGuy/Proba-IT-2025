@@ -49,5 +49,12 @@ mkdir imgs
 
 ### 5. Run the server
 ```bash
+cd backend
 node server.js
+```
+
+#### In a separate terminal:
+```bash
+cd frontend
+npm run build
 ```
