@@ -34,8 +34,9 @@ MONGO_URI = mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=50
 ```
 ```bash
 ACCESS_TOKEN_SECRET = 
-'''
- Generate a secure random token by running this command in your terminal:
+```
+
+#### Generate a secure random token by running this command in your terminal:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
