@@ -29,9 +29,11 @@ npm install
 ```
 
 ### 3. Create your `.env` file in the root directory and add the following secrets:
-    1. MONGO_URI = mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=5000
-    2. ACCESS_TOKEN_SECRET =
+    MONGO_URI = mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=5000
+    
+    ACCESS_TOKEN_SECRET =
     Generate a secure random token by running this command in your terminal:
+    
     ```bash
     node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
     ```
