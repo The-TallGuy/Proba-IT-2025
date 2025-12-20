@@ -1,2 +1,20 @@
+imgs/
 *.rest
 *.pdf
+*.jpg
+.vscode/
+node_modules/
+
+# Security
+.env
+.env.local
+.env.*
+
+# Build Output
+dist/
+build/
+
+# System Junk
+.DS_Store
+Thumbs.db
+*.log

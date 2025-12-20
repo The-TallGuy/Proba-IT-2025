@@ -21,18 +21,31 @@ This is a MERN stack web application designed to help students discover and prio
 ### 1. Clone the repository
 ```bash
 git clone [https://github.com/YOUR_USERNAME/pimp-your-grill.git](https://github.com/YOUR_USERNAME/pimp-your-grill.git)
+```
+```bash
 cd pimp-your-grill
 ```
+
 ### 2. Install dependencies:
 ```bash
-npm install
+npm run setup
 ```
 
-### 3. Create a `.env` file in the root directory and add the following secrets:
-```bash
-MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=5000
+### 3. Create your `.env` file in the root directory and add the following secrets:
+```ini
+MONGO_URI = mongodb+srv://<user>:<password>@cluster.mongodb.net/grillApp PORT=5000
 ```
+```ini
+ACCESS_TOKEN_SECRET = <See key generation below>
+```
+
+#### Generate a secure random token by running this command in your terminal:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
 ### 4. Run the server
 ```bash
-node server.js
+npm start
 ```

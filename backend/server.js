@@ -2,13 +2,31 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
 const User = require('./models/user.model.js')
+const Grill = require('./models/grill.model.js')
+const jwt = require('jsonwebtoken')
+const path = require('path')
+
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../imgs/'))
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+  }
+})
+const upload = multer({ storage })
 
 const app = express()
 app.use(express.json())
+app.use('/imgs', express.static(path.join(__dirname, '../imgs')));
 const port = 3000
 if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
+  require('dotenv').config()  
 }
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello, World!')
@@ -27,11 +45,41 @@ mongoose.connect(process.env.MONGO_URL).then( () => {
 
 //
 
+// Grill uploads
+
+app.post('/api/grills/upload', authenticateToken, upload.single('grill'), async (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).send("No file uploaded!");
+  }
+  
+  const newGrill = new Grill({
+      name: req.body.name,
+      menu: req.body.menu,
+      description: req.body.description,
+      photoUrl: 'imgs/' + req.file.filename, 
+      creatorId: req.user.id // Extracted from JWT
+  });
+
+  try {
+      const savedGrill = await newGrill.save();
+      res.status(200).json({ 
+          message: "Uploaded successfully!", 
+          grill: savedGrill 
+      });
+  } catch (err) {
+      res.status(500).send("Error saving grill: " + err.message);
+  }
+})
+
+//
+
 app.post('/api/users/signup', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
     const user = await User.create({username: req.body.username, email: req.body.email, password: hashedPassword});
-    res.status(201).json(user).send();
+    res.status(201).send("Signup successful!")
+    // ONLY FOR TESTING PURPOSES. Should remove before the product is makred for production.
+
     // Unique email and user check implemented on the db side (see user model)
   }
   catch (error) {
@@ -42,23 +90,45 @@ app.post('/api/users/signup', async (req, res) => {
 app.post('/api/users/login', async (req, res) => {
   try {
     let user;
-    // console.log("Request body:", req.body); // Log the request body
     if (req.body.username) {
       user = await User.findOne({ username: req.body.username }).exec();
-      // console.log("Searching by username:", req.body.username); // Log the username
     } else {
       user = await User.findOne({ email: req.body.email }).exec();
-      // console.log("Searching by email:", req.body.email); // Log the email
     }
     if (!user) return res.status(404).send("User does not exist!");
     if (await bcrypt.compare(req.body.password, user.password)) {
-      res.status(202).send("Login successful!");
+      /// Implementing JWT Authorisation
+      
+      let identifier = { id: user._id, username: user.username }
+      const accessToken = jwt.sign(identifier, process.env.ACCESS_TOKEN_SECRET)
+      res.status(202).json({ token: accessToken, message: "Login successful!" })
+
+      // Question is: where do we store this ?
+      // Nvm, I got the processing
+
+      ///
+
     } else {
-      res.status(423).send("Incorrect password!");
+      res.status(401).send("Incorrect password!");
     }
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
+function authenticateToken(req, res, next){
+  const authHeader = req.headers['authorization']
+  const token = authHeader ? authHeader.split(' ')[1] : null
+  if(token == null) return res.status(400).send("No token found in auth header.")
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.status(403).send("Invalid token!")
+    req.user = user
+    // Since we only pass in the token, we need this middle-ware to verify that the user in that token was hashed in accordance with out secret key.
+    // If it was, then we can make requests as that user.
+    // If it was not, then we are restricted.
+    next()
+  })
+}
 
 //
