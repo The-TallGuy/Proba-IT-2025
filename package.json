@@ -3,10 +3,12 @@
     "dev-backend": "cd ./backend && npm run dev",
     "dev-frontend": "cd ./frontend && npm run dev",
     "start": "concurrently \"npm run dev-backend\" \"npm run dev-frontend\"",
-    "setup": "mkdirp imgs && npm install && cd ./backend && npm install && cd ../frontend && npm install"
+    "setup": "npm install && node env-setup.js && cd ./backend && npm install && cd ../frontend && npm install"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "mkdirp": "^3.0.1"
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "@types/node": "^25.0.3"
   }
 }
