@@ -20,7 +20,7 @@ This is a MERN stack web application designed to help students discover and prio
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/pimp-your-grill.git](https://github.com/YOUR_USERNAME/pimp-your-grill.git)
+git clone https://github.com/The-TallGuy/Proba-IT-2025
 ```
 ```bash
 cd pimp-your-grill
